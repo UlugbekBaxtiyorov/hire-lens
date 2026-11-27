@@ -1,0 +1,54 @@
+name: Bug report
+description: Report a reproducible problem in HireLens.
+title: "[Bug] "
+body:
+  - type: input
+    id: ticket
+    attributes:
+      label: Jira ticket
+      description: Link an existing DP ticket if this problem is already tracked.
+      placeholder: DP-123
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      options:
+        - Frontend
+        - Backend
+        - CI or deployment
+        - Documentation
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Use a synthetic resume; do not attach real candidate data or credentials.
+      placeholder: |
+        1. Open ...
+        2. Upload a synthetic PDF ...
+        3. Click ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include the error message or a screenshot with sensitive information removed.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser and OS, plus the deployed URL or commit if known.
+      placeholder: Chrome on macOS, local development, commit abc1234
+    validations:
+      required: true
