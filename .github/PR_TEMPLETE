@@ -1,0 +1,21 @@
+## Description
+<!-- What does this PR do, and why? -->
+
+## Ticket
+<!-- PROJ-123 or Closes #123 -->
+
+## Type of change
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Refactor
+- [ ] Documentation
+- [ ] Other:
+
+## How to test
+<!-- Steps a reviewer can follow to verify the change -->
+
+## Checklist
+- [ ] Tests added or updated
+- [ ] Docs updated (if needed)
+- [ ] No new warnings or lint errors
+- [ ] Self-reviewed my own code
