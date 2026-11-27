@@ -1,0 +1,96 @@
+name: Deploy demo
+
+# Called only after both CI jobs succeed. Run CI manually on main to redeploy.
+on:
+  workflow_call:
+    secrets:
+      RENDER_API_KEY:
+        # The demo environment can supply this instead of the caller.
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-demo
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy and verify
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment: demo
+    env:
+      RENDER_SERVICE_ID: ${{ vars.RENDER_SERVICE_ID }}
+      DEMO_HEALTH_URL: ${{ vars.DEMO_HEALTH_URL }}
+    steps:
+      - name: Check deployment configuration
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        run: |
+          if [[ -z "$RENDER_API_KEY" ]]; then
+            echo "::error::Set RENDER_API_KEY before enabling demo deployment."
+            exit 1
+          fi
+          if [[ ! "$RENDER_SERVICE_ID" =~ ^srv-[a-zA-Z0-9]+$ ]]; then
+            echo "::error::Set RENDER_SERVICE_ID to the Render web service ID."
+            exit 1
+          fi
+          if [[ ! "$DEMO_HEALTH_URL" =~ ^https://[^/?#@]+/api/health$ ]]; then
+            echo "::error::Set DEMO_HEALTH_URL to https://your-demo-host/api/health."
+            exit 1
+          fi
+
+      - name: Deploy the tested commit and wait for it to go live
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        run: |
+          api="https://api.render.com/v1/services/$RENDER_SERVICE_ID/deploys"
+          payload=$(jq -n --arg commit "$GITHUB_SHA" '{commitId: $commit}')
+          # Do not retry POST: a timeout could have started a deployment already.
+          curl --fail --silent --show-error --connect-timeout 10 --max-time 60 \
+            --request POST "$api" \
+            --header "Authorization: Bearer $RENDER_API_KEY" \
+            --header 'Content-Type: application/json' \
+            --data "$payload" --output "$RUNNER_TEMP/render-deploy.json"
+          deploy_id=$(jq -er '.id | select(type == "string")' "$RUNNER_TEMP/render-deploy.json")
+          if [[ ! "$deploy_id" =~ ^dep-[a-zA-Z0-9]+$ ]]; then
+            echo "::error::Render returned an invalid deployment ID; check the service dashboard before retrying."
+            exit 1
+          fi
+          echo "Waiting for deployment $deploy_id of $GITHUB_SHA."
+          live=false
+          for attempt in $(seq 1 80); do
+            curl --fail --silent --show-error --connect-timeout 10 --max-time 30 \
+              --retry 3 --retry-delay 5 \
+              --header "Authorization: Bearer $RENDER_API_KEY" \
+              "$api/$deploy_id" --output "$RUNNER_TEMP/render-status.json"
+            status=$(jq -er '.status' "$RUNNER_TEMP/render-status.json")
+            case "$status" in
+              live)
+                jq -e --arg commit "$GITHUB_SHA" '.commit.id == $commit' \
+                  "$RUNNER_TEMP/render-status.json" > /dev/null
+                live=true
+                break
+                ;;
+              build_failed|update_failed|pre_deploy_failed|canceled|deactivated)
+                echo "::error::Render deployment failed; inspect $deploy_id in the service dashboard."
+                exit 1
+                ;;
+            esac
+            sleep 15
+          done
+          if [[ "$live" != true ]]; then
+            echo "::error::Deployment did not go live in time; inspect $deploy_id before retrying."
+            exit 1
+          fi
+
+      - name: Verify application health
+        run: |
+          curl --fail --silent --show-error --connect-timeout 10 --max-time 30 \
+            --retry 5 --retry-delay 10 --retry-all-errors \
+            "$DEMO_HEALTH_URL" --output "$RUNNER_TEMP/demo-health.json"
+          jq -e '.status == "ok"' "$RUNNER_TEMP/demo-health.json" > /dev/null
+          echo "Verified demo deployment of $GITHUB_SHA."

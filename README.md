@@ -218,12 +218,18 @@ backend/                  FastAPI app (Python, managed by uv)
 frontend/                 React + TypeScript app (Vite)
   src/
 docs/                     user guide and demo script (DP-36)
-.github/workflows/ci.yml  runs tests, lint and build on every push
+.github/workflows/ci.yml  runs tests, lint and build on PRs and pushes to main
 ```
 
 ## Working on a ticket
 
 1. Branch from `main` and name the branch after the Jira ticket, for example `DP-16-upload-page`.
 2. Commit small changes often, starting each message with the ticket key: `DP-16: show upload progress`.
-3. Push, open a pull request into `main`, and merge it once CI is green.
-4. Keep `main` working: never push broken code to it directly.
+3. Push, open a pull request into `main`, and merge it once CI is green and a code owner has approved it.
+4. Keep `main` working: changes go through a pull request; direct pushes are blocked.
+
+See [Contributing](docs/contributing.md) for templates, review rules, code owners,
+commit conventions, and required checks.
+
+The [demo deployment workflow](docs/deployment.md) is prepared but disabled until
+a hosting service and its deployment configuration are connected.

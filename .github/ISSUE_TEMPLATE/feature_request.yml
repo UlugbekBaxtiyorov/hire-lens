@@ -1,0 +1,39 @@
+name: Feature request
+description: Propose an improvement with clear acceptance criteria.
+title: "[Feature] "
+body:
+  - type: input
+    id: ticket
+    attributes:
+      label: Jira ticket
+      description: Link an existing DP ticket if this feature is already tracked.
+      placeholder: DP-123
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or user need
+      description: Who needs this, and what cannot they do today?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed behavior
+      description: Describe the result the user should see.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: List observable outcomes that show the feature is complete.
+      placeholder: |
+        - [ ] A candidate can ...
+        - [ ] When ... happens, the app shows ...
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Optional workarounds or other approaches.

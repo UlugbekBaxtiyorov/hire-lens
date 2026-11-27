@@ -1,0 +1,8 @@
+# Both owners have write access. One owner can review the other's changes.
+# The last matching rule wins; keep shared owners together on the same line.
+* @UlugbekBaxtiyorov @mahmudcoding
+
+/backend/ @UlugbekBaxtiyorov @mahmudcoding
+/frontend/ @UlugbekBaxtiyorov @mahmudcoding
+/.github/ @UlugbekBaxtiyorov @mahmudcoding
+/docs/ @UlugbekBaxtiyorov @mahmudcoding
