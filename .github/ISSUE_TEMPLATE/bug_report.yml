@@ -1,7 +1,16 @@
 name: Bug report
 description: Report a reproducible problem in HireLens.
 title: "[Bug] "
+labels: ["bug"]
 body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a problem. Before you submit:
+
+        - Search the [open issues](https://github.com/UlugbekBaxtiyorov/hire-lens/issues) so the same bug is not reported twice.
+        - Reproduce it with a file from `test-resumes/`. Never attach a real resume, password, API key or session cookie.
+        - Do not describe a security vulnerability here: this form is public. Contact a code owner privately instead.
   - type: input
     id: ticket
     attributes:
@@ -15,9 +24,22 @@ body:
       options:
         - Frontend
         - Backend
+        - Database or migrations
         - CI or deployment
         - Documentation
         - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      description: How much does this block a candidate or the team?
+      options:
+        - Critical - the app is unusable or data is lost or exposed
+        - High - a main feature is broken and there is no workaround
+        - Medium - a feature is broken but there is a workaround
+        - Low - cosmetic or minor inconvenience
     validations:
       required: true
   - type: textarea
@@ -31,6 +53,12 @@ body:
         3. Click ...
     validations:
       required: true
+  - type: input
+    id: test_file
+    attributes:
+      label: Test file used
+      description: The file from `test-resumes/` that triggers the problem, if a resume is involved.
+      placeholder: test-resumes/bad_02_table_layout.pdf
   - type: textarea
     id: expected
     attributes:
@@ -44,6 +72,12 @@ body:
       description: Include the error message or a screenshot with sensitive information removed.
     validations:
       required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or API response
+      description: Browser console output, the API response body with its error `code`, or the backend traceback. This is formatted as code automatically.
+      render: shell
   - type: input
     id: environment
     attributes:
@@ -52,3 +86,12 @@ body:
       placeholder: Chrome on macOS, local development, commit abc1234
     validations:
       required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched the existing issues and this bug is not already reported.
+          required: true
+        - label: This report contains no real candidate data, credentials or secrets.
+          required: true
